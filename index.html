@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jason — Web Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f7f5f0;
+        --ink: #1a1814;
+        --ink-muted: #6b6760;
+        --accent: #c8502a;
+        --line: #e0ddd6;
+        --card-bg: #ffffff;
+        --serif: 'DM Serif Display', Georgia, serif;
+        --mono: 'DM Mono', 'Courier New', monospace;
+      }
+
+      html.dark {
+        --bg: #141210;
+        --ink: #f0ece4;
+        --ink-muted: #8a8580;
+        --accent: #e06840;
+        --line: #2a2724;
+        --card-bg: #1c1a17;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--mono);
+        font-size: 14px;
+        line-height: 1.7;
+        min-height: 100vh;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      body {
+        cursor: none;
+      }
+      #cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        width: 10px;
+        height: 10px;
+        background: var(--accent);
+        border-radius: 50%;
+        pointer-events: none;
+        transition:
+          transform 0.15s ease,
+          opacity 0.2s;
+        transform: translate(-50%, -50%);
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 1.4rem 0;
+        background: var(--bg);
+        border-bottom: 1px solid transparent;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+      nav.scrolled {
+        border-color: var(--line);
+      }
+      nav .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-logo {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        text-decoration: none;
+        color: var(--ink);
+      }
+      .nav-logo span {
+        color: var(--accent);
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--ink-muted);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+
+      .theme-toggle {
+        background: none;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        width: 44px;
+        height: 24px;
+        cursor: none;
+        position: relative;
+        transition: border-color 0.3s;
+        flex-shrink: 0;
+      }
+      .theme-toggle::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--ink-muted);
+        transition:
+          transform 0.3s ease,
+          background 0.3s;
+      }
+      html.dark .theme-toggle::after {
+        transform: translateX(20px);
+        background: var(--accent);
+      }
+      html.dark .theme-toggle {
+        border-color: var(--accent);
+      }
+
+      .burger {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: none;
+        padding: 4px;
+        width: 28px;
+      }
+      .burger span {
+        display: block;
+        height: 1.5px;
+        background: var(--ink);
+        border-radius: 2px;
+        transition:
+          transform 0.3s ease,
+          opacity 0.3s ease,
+          width 0.3s ease;
+        transform-origin: center;
+      }
+      .burger span:nth-child(3) {
+        width: 60%;
+      }
+      .burger.open span:nth-child(1) {
+        transform: translateY(6.5px) rotate(45deg);
+      }
+      .burger.open span:nth-child(2) {
+        opacity: 0;
+      }
+      .burger.open span:nth-child(3) {
+        width: 100%;
+        transform: translateY(-6.5px) rotate(-45deg);
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg);
+        z-index: 99;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2.5rem;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+        pointer-events: none;
+      }
+      .mobile-menu.open {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+      }
+      .mobile-menu a {
+        font-family: var(--serif);
+        font-size: 2.2rem;
+        text-decoration: none;
+        color: var(--ink);
+        transition: color 0.2s;
+      }
+      .mobile-menu a:hover {
+        color: var(--accent);
+      }
+
+      #hero {
+        padding: 14rem 0 8rem;
+        position: relative;
+      }
+      .hero-tag {
+        display: inline-block;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        padding: 0.3rem 0.7rem;
+        border-radius: 2px;
+        margin-bottom: 1.8rem;
+        opacity: 0;
+        animation: fadeUp 0.6s ease 0.2s forwards;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-size: clamp(2.8rem, 7vw, 5rem);
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: fadeUp 0.6s ease 0.4s forwards;
+      }
+      h1 em {
+        font-style: italic;
+        color: var(--ink-muted);
+      }
+      .hero-sub {
+        max-width: 480px;
+        color: var(--ink-muted);
+        font-size: 0.9rem;
+        line-height: 1.8;
+        margin-bottom: 2.5rem;
+        opacity: 0;
+        animation: fadeUp 0.6s ease 0.6s forwards;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        opacity: 0;
+        animation: fadeUp 0.6s ease 0.8s forwards;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.75rem 1.6rem;
+        text-decoration: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 2px;
+        transition: all 0.2s;
+        cursor: none;
+      }
+      .btn-primary {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      .btn-primary:hover {
+        background: var(--accent);
+      }
+      .btn-secondary {
+        border: 1px solid var(--line);
+        color: var(--ink-muted);
+      }
+      .btn-secondary:hover {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+      .hero-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--line);
+      }
+
+      section {
+        padding: 6rem 0;
+      }
+      .section-label {
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.6rem;
+      }
+      h2 {
+        font-family: var(--serif);
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        margin-bottom: 3rem;
+        line-height: 1.2;
+      }
+
+      #about .about-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: start;
+      }
+      #about p {
+        color: var(--ink-muted);
+        line-height: 1.9;
+        margin-bottom: 1rem;
+      }
+      .skills-list {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+      }
+      .skills-list li {
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        padding: 0.35rem 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        color: var(--ink-muted);
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .skills-list li:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      #projects {
+        border-top: 1px solid var(--line);
+      }
+      .projects-grid {
+        display: grid;
+        gap: 1.5rem;
+      }
+      .project-card {
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: start;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .project-card:hover {
+        border-color: var(--ink);
+        transform: translateY(-2px);
+      }
+      .project-num {
+        font-size: 0.68rem;
+        color: var(--accent);
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+      }
+      .project-title {
+        font-family: var(--serif);
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      .project-desc {
+        color: var(--ink-muted);
+        font-size: 0.82rem;
+        line-height: 1.8;
+      }
+      .project-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 1rem;
+      }
+      .project-tags span {
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+        padding: 0.2rem 0.6rem;
+        background: var(--bg);
+        border-radius: 2px;
+        color: var(--ink-muted);
+      }
+      .project-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .project-links a {
+        font-size: 0.72rem;
+        text-decoration: none;
+        color: var(--ink-muted);
+        letter-spacing: 0.06em;
+        transition: color 0.2s;
+      }
+      .project-links a:hover {
+        color: var(--accent);
+      }
+      .project-links a::before {
+        content: '↗ ';
+      }
+
+      #contact {
+        border-top: 1px solid var(--line);
+      }
+      .contact-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+      .contact-links {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .contact-links a {
+        text-decoration: none;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        transition: color 0.2s;
+      }
+      .contact-links a:hover {
+        color: var(--accent);
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 2rem 0;
+      }
+      footer .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      footer p {
+        font-size: 0.72rem;
+        color: var(--ink-muted);
+        letter-spacing: 0.06em;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 640px) {
+        #about .about-grid {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        .project-card {
+          grid-template-columns: 1fr;
+        }
+        .contact-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .nav-links {
+          display: none;
+        }
+        .burger {
+          display: flex;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cursor"></div>
+
+    <nav id="nav">
+      <div class="container">
+        <a class="nav-logo" href="#">Jason Ancheta</a>
+        <div class="nav-right">
+          <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+          <button
+            class="theme-toggle"
+            id="themeToggle"
+            aria-label="Toggle dark mode"
+          ></button>
+          <button class="burger" id="burger" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#about" onclick="closeMobileMenu()">About</a>
+      <a href="#projects" onclick="closeMobileMenu()">Projects</a>
+      <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+    </div>
+
+    <section id="hero">
+      <div class="container">
+        <div class="hero-tag">Available for work</div>
+        <h1>Jason Ancheta<br /><em>Web Developer</em></h1>
+        <p class="hero-sub">
+          I build clean, functional web applications — from backend APIs to
+          polished frontends. Based in Manolo Fortich, Bukidnon, Philippines.
+        </p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn btn-primary">View Projects</a>
+          <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+        </div>
+      </div>
+      <div class="hero-line"></div>
+    </section>
+
+    <section id="about">
+      <div class="container">
+        <div class="about-grid">
+          <div>
+            <p class="section-label">About</p>
+            <h2>Developer &<br />Problem Solver</h2>
+            <p>
+              Transitioning into web development from a background in IT
+              instruction, which means I bring both technical depth and the
+              ability to communicate clearly — a rare combo.
+            </p>
+            <p>
+              I enjoy building things that actually work well: clean code,
+              thoughtful UX, and systems that make sense. Currently expanding my
+              skills across the full web stack.
+            </p>
+          </div>
+          <div>
+            <ul class="skills-list">
+              <li>PHP</li>
+              <li>Laravel</li>
+              <li>MySQL</li>
+              <li>JavaScript</li>
+              <li>HTML / CSS</li>
+              <li>WordPress</li>
+              <li>Elementor Pro</li>
+              <li>Git / GitHub</li>
+              <li>REST APIs</li>
+              <li>Figma</li>
+              <li>Graphic Design</li>
+              <li>Logo Design</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="container">
+        <p class="section-label">Work</p>
+        <h2>Selected Projects</h2>
+        <div class="projects-grid">
+          <div class="project-card reveal">
+            <div>
+              <p class="project-num">01</p>
+              <p class="project-title">Portfolio Site</p>
+              <p class="project-desc">
+                This site — a clean, minimal developer portfolio built with
+                vanilla HTML/CSS/JS and hosted on GitHub Pages.
+              </p>
+              <div class="project-tags">
+                <span>HTML</span><span>CSS</span><span>JavaScript</span
+                ><span>GitHub Pages</span>
+              </div>
+            </div>
+            <div class="project-links">
+              <a href="#" target="_blank">Live</a>
+              <a href="#" target="_blank">Code</a>
+            </div>
+          </div>
+
+          <!-- Add more project cards here following the same pattern -->
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container">
+        <p class="section-label">Contact</p>
+        <div class="contact-inner reveal">
+          <div>
+            <h2 style="margin-bottom: 0.5rem">
+              Let's work<br /><em
+                style="font-style: italic; color: var(--ink-muted)"
+                >together.</em
+              >
+            </h2>
+            <p
+              style="
+                color: var(--ink-muted);
+                margin-top: 1rem;
+                font-size: 0.85rem;
+              "
+            >
+              Open to freelance projects and full-time roles.
+            </p>
+          </div>
+          <div class="contact-links">
+            <a href="mailto:jasoncatianancheta@gmail.com">Email</a>
+            <a href="https://github.com/aojianshu" target="_blank">GitHub</a>
+            <a href="https://linkedin.com/in/jasoncatianancheta" target="_blank"
+              >LinkedIn</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <p>© 2026 Jason Ancheta. Built with care.</p>
+        <p>Manolo Fortich, Bukidnon, PH</p>
+      </div>
+    </footer>
+
+    <script>
+      // Custom cursor
+      const cursor = document.getElementById('cursor');
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      // Nav border on scroll
+      const nav = document.getElementById('nav');
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+      });
+
+      // Dark mode
+      const themeToggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+
+      // 1. Saved preference wins; fall back to OS preference on first visit
+      const saved = localStorage.getItem('theme');
+      const systemDark = window.matchMedia(
+        '(prefers-color-scheme: dark)',
+      ).matches;
+      if (saved === 'dark' || (!saved && systemDark))
+        html.classList.add('dark');
+
+      // 2. Toggle on click, persist choice
+      themeToggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem(
+          'theme',
+          html.classList.contains('dark') ? 'dark' : 'light',
+        );
+      });
+
+      // 3. Follow OS changes only when no manual preference is saved
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', (e) => {
+          if (!localStorage.getItem('theme'))
+            html.classList.toggle('dark', e.matches);
+        });
+
+      // Burger / mobile menu
+      const burger = document.getElementById('burger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      burger.addEventListener('click', () => {
+        const isOpen = mobileMenu.classList.toggle('open');
+        burger.classList.toggle('open', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      });
+      function closeMobileMenu() {
+        mobileMenu.classList.remove('open');
+        burger.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      // Scroll reveal
+      const reveals = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+              setTimeout(() => e.target.classList.add('visible'), i * 120);
+              observer.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+      reveals.forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>
